@@ -5,28 +5,169 @@
         "surveys": [
             {
                 "type": "star",
-                "question": "您覺得環境整潔度如何?",
+                "question": "您覺得環境整潔度如何？",
                 "required": true
             },
             {
                 "type": "star",
-                "question": "您覺得設備是否齊全?",
+                "question": "您覺得設備是否齊全？",
                 "required": true
             },
             {
                 "type": "star",
-                "question": "您覺得動線引導標示是否清晰?",
+                "question": "您覺得動線引導標示是否清晰？",
                 "required": true
             },
             {
                 "type": "star",
-                "question": "您覺得此環境的安全性如何?",
+                "question": "您覺得此環境的安全性如何？",
                 "required": true
             },
             {
                 "type": "star",
-                "question": "您覺得此環境的照明是否足夠?",
+                "question": "您覺得此環境的照明是否足夠？",
                 "required": true
+            }
+        ]
+    },
+    {
+        "pageNumber": 2,
+        "title": "報修調查",
+        "surveys": [
+            {
+                "type": "select",
+                "question": "您現在所在位置：",
+                "required": true,
+                "options": [
+                    {
+                        "label": "蝌蚪區",
+                        "value": "1"
+                    },
+                    {
+                        "label": "成蛙區",
+                        "value": "2"
+                    },
+                    {
+                        "label": "黑框蟾蜍專區",
+                        "value": "3"
+                    }
+                ]
+            },
+            {
+                "type": "radio",
+                "question": "是否需要報修？",
+                "required": true,
+                "name": "repair_needed",
+                "options": [
+                    {
+                        "label": "不需要",
+                        "value": 0,
+                        "related": [
+                            {
+                                "id": "2-3-1",
+                                "action": "hide"
+                            },
+                            {
+                                "id": "2-3-2",
+                                "action": "hide"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "需要",
+                        "value": 1,
+                        "related": [
+                            {
+                                "id": "2-3-1",
+                                "action": "show"
+                            },
+                            {
+                                "id": "2-3-2",
+                                "action": "show"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "select",
+                "id": "2-3-1",
+                "question": "故障物品類型：",
+                "required": true,
+                "hidden": true,
+                "options": [
+                    {
+                        "label": "衛生紙",
+                        "value": "1"
+                    },
+                    {
+                        "label": "洗手乳",
+                        "value": "2"
+                    },
+                    {
+                        "label": "門鎖",
+                        "value": "3"
+                    },
+                    {
+                        "label": "地面",
+                        "value": "4"
+                    }
+                ]
+            },
+            {
+                "type": "select",
+                "id": "2-3-2",
+                "question": "故障狀態描述：",
+                "required": true,
+                "hidden": true,
+                "options": [
+                    {
+                        "label": "備品不足",
+                        "value": "1"
+                    },
+                    {
+                        "label": "積水",
+                        "value": "2"
+                    },
+                    {
+                        "label": "損壞",
+                        "value": "3"
+                    },
+                    {
+                        "label": "生鏽",
+                        "value": "4"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "pageNumber": 3,
+        "title": "意見回饋",
+        "surveys": [
+            {
+                "type": "info",
+                "options": [
+                    {
+                        "label": "歡迎留下您的建議！您的意見是我們進步的動力。"
+                    }
+                ]
+            },
+            {
+                "type": "input",
+                "question": "意見回饋"
+            },
+            {
+                "type": "input",
+                "question": "姓名"
+            },
+            {
+                "type": "input",
+                "question": "聯絡電話"
+            },
+            {
+                "type": "input",
+                "question": "電子信箱"
             }
         ]
     }

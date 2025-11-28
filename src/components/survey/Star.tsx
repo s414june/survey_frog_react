@@ -1,8 +1,6 @@
 import { FaStar } from "react-icons/fa"
 
 const Component = ({
-	question,
-	required,
 	starCount = 5,
 }: {
 	question?: string
@@ -12,13 +10,7 @@ const Component = ({
 	const starIcons = StarIconsBuilder(starCount)
 	return (
 		<>
-			<div className="mb-5">
-				<h5 className="text-xl font-bold mb-3">
-					{question}
-					{getRequiredAsterisk(required)}
-				</h5>
-				<div className="flex text-4xl">{starIcons}</div>
-			</div>
+			<div className="flex text-4xl">{starIcons}</div>
 		</>
 	)
 }
@@ -35,13 +27,6 @@ const StarIconsBuilder = (starCount: number) => {
 		)
 	}
 	return stars
-}
-
-const getRequiredAsterisk = (required: boolean | undefined) => {
-	if (required) {
-		return <span className="text-red-500">*</span>
-	}
-	return null
 }
 
 export default Component
