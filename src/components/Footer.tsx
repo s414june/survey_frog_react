@@ -1,4 +1,11 @@
-function App() {
+import clsx from "clsx"
+import { MdKeyboardArrowLeft } from "react-icons/md"
+import { MdKeyboardArrowRight } from "react-icons/md"
+
+function Component() {
+	const buttonClassesString =
+		"bg-zinc-200 w-10 h-10 rounded-md m-1 p-2 cursor-pointer flex justify-center items-center"
+
 	return (
 		<>
 			<footer
@@ -12,11 +19,11 @@ function App() {
 						<div className="mx-2">100%</div>
 					</div>
 					<div className="flex">
-						<div className="bg-zinc-200 w-10 h-10 rounded-md m-1 p-2 cursor-pointer">
-							左
+						<div className={clsx(buttonClassesString, { "opacity-40": true })}>
+							<MdKeyboardArrowLeft className="text-2xl text-cyan-500" />
 						</div>
-						<div className="bg-zinc-200 w-10 h-10 rounded-md m-1 p-2 cursor-pointer">
-							右
+						<div className={clsx(buttonClassesString, { "opacity-40": false })}>
+							<MdKeyboardArrowRight className="text-2xl text-cyan-500" />
 						</div>
 					</div>
 				</div>
@@ -25,4 +32,4 @@ function App() {
 	)
 }
 
-export default App
+export default Component

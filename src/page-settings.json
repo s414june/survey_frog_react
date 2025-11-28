@@ -1,0 +1,33 @@
+[
+    {
+        "pageNumber": 1,
+        "title": "滿意度調查",
+        "surveys": [
+            {
+                "type": "star",
+                "question": "您覺得環境整潔度如何?",
+                "required": true
+            },
+            {
+                "type": "star",
+                "question": "您覺得設備是否齊全?",
+                "required": true
+            },
+            {
+                "type": "star",
+                "question": "您覺得動線引導標示是否清晰?",
+                "required": true
+            },
+            {
+                "type": "star",
+                "question": "您覺得此環境的安全性如何?",
+                "required": true
+            },
+            {
+                "type": "star",
+                "question": "您覺得此環境的照明是否足夠?",
+                "required": true
+            }
+        ]
+    }
+]
