@@ -1,7 +1,14 @@
 import Card from "../components/Card"
 import Button from "../components/Button"
+import { useNavigate } from "react-router-dom"
+import { nextRoute } from "../utils/pager"
 
 function App() {
+	const navigate = useNavigate()
+	const startSurvey = () => {
+		navigate(nextRoute("/", null) ?? "")
+	}
+
 	return (
 		<>
 			<Card>
@@ -17,7 +24,10 @@ function App() {
 						您的意見是我們進步的動力。
 					</div>
 					<div className="w-full flex justify-center">
-						<Button message="開始" className="w-60"></Button>
+						<Button
+							message="開始"
+							className="w-60"
+							onClick={startSurvey}></Button>
 					</div>
 				</div>
 			</Card>

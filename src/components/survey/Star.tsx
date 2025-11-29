@@ -21,7 +21,7 @@ const StarIconsBuilder = (starCount: number) => {
 		stars.push(
 			<FaStar
 				key={i}
-				className="w-12 cursor-pointer text-gray-200"
+				className="w-12 cursor-pointer select-none text-gray-200"
 				onClick={() => console.log(`Star ${i + 1} clicked`)}
 			/>
 		)

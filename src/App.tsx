@@ -1,5 +1,4 @@
-import { RouterProvider } from "react-router/dom"
-import { router } from "./router"
+import { Outlet } from "react-router-dom"
 import "./App.css"
 import Footer from "./components/Footer"
 
@@ -9,7 +8,7 @@ function App() {
 			<div className="bg-zinc-100 min-h-screen vh-for-mobile">
 				<div className="grow pb-20">
 					<div className="p-4 w-full flex justify-center">
-						<RouterProvider router={router} />
+						<Outlet />
 					</div>
 				</div>
 				<div>

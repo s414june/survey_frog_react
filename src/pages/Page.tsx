@@ -1,17 +1,21 @@
+import { useState, useEffect } from "react"
+import { useLoaderData } from "react-router"
+import { useNavigate } from "react-router-dom"
+import { nextRoute } from "../utils/pager"
 import Card from "../components/Card"
 import Button from "../components/Button"
-import { useLoaderData } from "react-router"
 import Star from "../components/survey/Star"
 import Select from "../components/survey/Select"
 import RadioGroup from "../components/survey/RadioGroup"
 import TextInput from "../components/survey/TextInput"
 import TextInfo from "../components/survey/TextInfo"
-import pageSettings from "../page-settings.json"
 import type { ISurveyParams, ISurveyParamsWithUserInput } from "../types"
-import { useState } from "react"
+import { usePageStore } from "../composable/PageContext"
 
 function App() {
+	const { totalPages } = usePageStore()
 	const loaderData = useLoaderData()
+	const navigate = useNavigate()
 	const currentPageNumber = loaderData.pageNumber
 
 	const [surveyData, setSurveyData] = useState<ISurveyParamsWithUserInput[]>(
@@ -22,57 +26,43 @@ function App() {
 			}))
 	)
 
-	const handleAction = (valueList: { action: string; id: string }[]) => {
-		setSurveyData((prev) => {
-			const newData = prev?.map((item) => {
-				valueList.forEach((value) => {
-					if (item.id === value.id) {
-						const newUserInput = item.userInput || {}
-						if (value.action === "show") {
-							newUserInput.hidden = false
-						} else if (value.action === "hide") {
-							newUserInput.hidden = true
-						}
-						return { ...item, userInput: newUserInput }
-					}
-				})
-				return item
-			})
-			return newData
-		})
+	const actionButtonElement = (
+		pageNumber: number,
+		totalPages: number | null
+	) => {
+		const pageRoute = "/page/" + pageNumber
+		if (!totalPages) {
+			return null
+		}
+		return pageNumber < totalPages ? (
+			<Button
+				message="下一頁"
+				onClick={() =>
+					navigate(nextRoute(pageRoute, totalPages) ?? "")
+				}></Button>
+		) : (
+			<Button
+				message="送出"
+				className="w-60"
+				onClick={() =>
+					navigate(nextRoute(pageRoute, totalPages) ?? "")
+				}></Button>
+		)
 	}
 
-	if (!surveyData) {
+	const getRequiredAsterisk = (required: boolean | undefined) => {
+		if (required) {
+			return <span className="text-red-500">*</span>
+		}
 		return null
 	}
-	const surveyBlocks = surveyData.map((item: ISurveyParamsWithUserInput) =>
-		surveyJsxElement(item, handleAction)
-	)
 
-	return (
-		<>
-			<Card>
-				<form className="w-full">
-					<div className="mb-5">
-						<h2 className="text-3xl font-bold before:block before:absolute before:w-2 before:h-10 before:left-0 before:bg-cyan-500">
-							{loaderData.title}
-						</h2>
-						<div className="my-4 question">{surveyBlocks}</div>
-					</div>
-					<div className="w-full flex justify-center">
-						{actionButtonElement(currentPageNumber)}
-					</div>
-				</form>
-			</Card>
-		</>
-	)
-}
-
-const surveyJsxElement = (
-	params: ISurveyParamsWithUserInput,
-	handleAction: ((value: { action: string; id: string }[]) => void) | undefined
-) => {
-	const getElementByType = () => {
+	const getElementByType = (
+		params: ISurveyParamsWithUserInput,
+		handleAction:
+			| ((value: { action: string; id: string }[]) => void)
+			| undefined
+	) => {
 		switch (params.type) {
 			case "star":
 				return <Star question={params.question} required={params.required} />
@@ -102,37 +92,84 @@ const surveyJsxElement = (
 
 			case "info":
 				return <TextInfo options={params.options} />
+			default:
+				break
 		}
-	}
-	if (params.userInput.hidden ?? params.hidden) {
 		return null
 	}
-	return (
-		<>
-			<div className="mb-5">
+
+	const surveyJsxElement = (
+		params: ISurveyParamsWithUserInput,
+		index: number,
+		handleAction:
+			| ((value: { action: string; id: string }[]) => void)
+			| undefined
+	) => {
+		return (
+			<div key={index} className="mb-5">
 				<h5 className="text-xl font-bold mb-3">
 					{params.question}
 					{getRequiredAsterisk(params.required)}
 				</h5>
-				<div>{getElementByType()} </div>
+				<div>{getElementByType(params, handleAction)} </div>
 			</div>
+		)
+	}
+
+	const handleAction = (valueList: { action: string; id: string }[]) => {
+		setSurveyData((prev) => {
+			const newData = prev?.map((item) => {
+				valueList.forEach((value) => {
+					if (item.id === value.id) {
+						const newUserInput = item.userInput || {}
+						if (value.action === "show") {
+							newUserInput.hidden = false
+						} else if (value.action === "hide") {
+							newUserInput.hidden = true
+						}
+						return { ...item, userInput: newUserInput }
+					}
+				})
+				return item
+			})
+			return newData
+		})
+	}
+
+	if (!surveyData) {
+		return null
+	}
+	const getSurveyBlocks = () =>
+		surveyData.map((item: ISurveyParamsWithUserInput, index: number) =>
+			surveyJsxElement(item, index, handleAction)
+		)
+
+	useEffect(() => {
+		setSurveyData(
+			loaderData.surveys.map((item: ISurveyParams) => ({
+				...item,
+				userInput: { hidden: item.hidden ?? false, value: null },
+			}))
+		)
+	}, [loaderData.pageNumber])
+
+	return (
+		<>
+			<Card>
+				<form className="w-full">
+					<div className="mb-5">
+						<h2 className="text-3xl font-bold before:block before:absolute before:w-2 before:h-10 before:left-0 before:bg-cyan-500">
+							{loaderData.title}
+						</h2>
+						<div className="my-4 question">{getSurveyBlocks()}</div>
+					</div>
+					<div className="w-full flex justify-center">
+						{actionButtonElement(currentPageNumber, totalPages)}
+					</div>
+				</form>
+			</Card>
 		</>
 	)
-}
-
-const actionButtonElement = (pageNumber: number) => {
-	return pageNumber < pageSettings.length ? (
-		<Button message="下一頁"></Button>
-	) : (
-		<Button message="送出" className="w-60"></Button>
-	)
-}
-
-const getRequiredAsterisk = (required: boolean | undefined) => {
-	if (required) {
-		return <span className="text-red-500">*</span>
-	}
-	return null
 }
 
 export default App

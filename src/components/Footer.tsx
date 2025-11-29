@@ -1,10 +1,17 @@
 import clsx from "clsx"
 import { MdKeyboardArrowLeft } from "react-icons/md"
 import { MdKeyboardArrowRight } from "react-icons/md"
+import { useNavigate, useLocation } from "react-router-dom"
+import { nextRoute, prevRoute } from "../utils/pager"
+import { usePageStore } from "../composable/PageContext"
 
 function Component() {
+	const location = useLocation()
+	const navigate = useNavigate()
+	const { totalPages } = usePageStore()
+
 	const buttonClassesString =
-		"bg-zinc-200 w-10 h-10 rounded-md m-1 p-2 cursor-pointer flex justify-center items-center"
+		"bg-zinc-200 w-10 h-10 rounded-md m-1 p-2 select-none flex justify-center items-center"
 
 	return (
 		<>
@@ -19,12 +26,30 @@ function Component() {
 						<div className="mx-2">100%</div>
 					</div>
 					<div className="flex">
-						<div className={clsx(buttonClassesString, { "opacity-40": true })}>
+						<button
+							disabled={location.pathname === "/"}
+							className={clsx(buttonClassesString, {
+								"opacity-40": location.pathname === "/",
+								"cursor-pointer": location.pathname !== "/",
+								"cursor-not-allowed": location.pathname === `/`,
+							})}
+							onClick={() =>
+								navigate(prevRoute(location.pathname, totalPages) ?? "")
+							}>
 							<MdKeyboardArrowLeft className="text-2xl text-cyan-500" />
-						</div>
-						<div className={clsx(buttonClassesString, { "opacity-40": false })}>
+						</button>
+						<button
+							disabled={location.pathname === `/end`}
+							className={clsx(buttonClassesString, {
+								"opacity-40": location.pathname === `/end`,
+								"cursor-pointer": location.pathname !== "/end",
+								"cursor-not-allowed": location.pathname === `/end`,
+							})}
+							onClick={() =>
+								navigate(nextRoute(location.pathname, totalPages) ?? "")
+							}>
 							<MdKeyboardArrowRight className="text-2xl text-cyan-500" />
-						</div>
+						</button>
 					</div>
 				</div>
 			</footer>
