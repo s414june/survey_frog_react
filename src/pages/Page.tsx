@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useLoaderData } from "react-router"
 import { useNavigate } from "react-router-dom"
 import { nextRoute } from "../utils/pager"
@@ -19,11 +19,10 @@ function App() {
 	const currentPageNumber = loaderData.pageNumber
 
 	const [surveyData, setSurveyData] = useState<ISurveyParamsWithUserInput[]>(
-		() =>
-			loaderData.surveys.map((item: ISurveyParams) => ({
-				...item,
-				userInput: { hidden: item.hidden ?? false, value: null },
-			}))
+		loaderData.surveys.map((item: ISurveyParams) => ({
+			...item,
+			userInput: { hidden: item.hidden ?? false, value: null },
+		}))
 	)
 
 	const actionButtonElement = (
@@ -105,6 +104,7 @@ function App() {
 			| ((value: { action: string; id: string }[]) => void)
 			| undefined
 	) => {
+		if (params.userInput.hidden) return
 		return (
 			<div key={index} className="mb-5">
 				<h5 className="text-xl font-bold mb-3">
@@ -136,22 +136,11 @@ function App() {
 		})
 	}
 
-	if (!surveyData) {
-		return null
-	}
-	const getSurveyBlocks = () =>
-		surveyData.map((item: ISurveyParamsWithUserInput, index: number) =>
+	const getSurveyBlocks = () => {
+		return surveyData.map((item: ISurveyParamsWithUserInput, index: number) =>
 			surveyJsxElement(item, index, handleAction)
 		)
-
-	useEffect(() => {
-		setSurveyData(
-			loaderData.surveys.map((item: ISurveyParams) => ({
-				...item,
-				userInput: { hidden: item.hidden ?? false, value: null },
-			}))
-		)
-	}, [loaderData.pageNumber])
+	}
 
 	return (
 		<>

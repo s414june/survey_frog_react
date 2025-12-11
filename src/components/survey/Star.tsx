@@ -1,4 +1,6 @@
 import { FaStar } from "react-icons/fa"
+import clsx from "clsx"
+import { useState } from "react"
 
 const Component = ({
 	starCount = 5,
@@ -16,13 +18,20 @@ const Component = ({
 }
 
 const StarIconsBuilder = (starCount: number) => {
+	const [userInputIndex, setUserInputIndex] = useState<null | number>(null)
+	const fillStars = (starIndex: number) => {
+		return userInputIndex && userInputIndex >= starIndex
+	}
 	const stars = []
 	for (let i = 0; i < starCount; i++) {
 		stars.push(
 			<FaStar
 				key={i}
-				className="w-12 cursor-pointer select-none text-gray-200"
-				onClick={() => console.log(`Star ${i + 1} clicked`)}
+				className={clsx("w-12 cursor-pointer select-none", {
+					"text-cyan-500": fillStars(i),
+					" text-gray-200": !fillStars(i),
+				})}
+				onClick={() => setUserInputIndex(i)}
 			/>
 		)
 	}

@@ -1,4 +1,4 @@
-import type { IRelatedAction } from "../../types"
+import type { IRelatedAction, IOption } from "../../types"
 
 const Component = ({
 	options,
@@ -8,10 +8,10 @@ const Component = ({
 }: {
 	question?: string
 	required?: boolean
-	options?: { label: string; value: any; related?: IRelatedAction }[]
+	options?: IOption[]
 	name?: string
 	hidden?: boolean
-	onAction?: (value: { action: string; id: string }[]) => void
+	onAction?: (value: IRelatedAction[]) => void
 }) => {
 	if (hidden) {
 		return null
@@ -26,11 +26,9 @@ const Component = ({
 }
 
 const getRadioJsx = (
-	options:
-		| { label: string; value: any; related?: IRelatedAction }[]
-		| undefined,
+	options: IOption[] | undefined,
 	name?: string,
-	onAction?: (value: { action: string; id: string }[]) => void
+	onAction?: (value: IRelatedAction[]) => void
 ) => {
 	if (!options) return null
 	return options.map((option, index) => (
@@ -54,8 +52,8 @@ const getRadioJsx = (
 }
 
 const doAction = (
-	value: any,
-	onAction?: (value: { action: string; id: string }[]) => void
+	value?: IRelatedAction[],
+	onAction?: (value: IRelatedAction[]) => void
 ) => {
 	if (!value) return
 	if (!onAction) return

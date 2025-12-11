@@ -4,7 +4,7 @@ interface IRelatedAction {
 }
 
 interface IOption {
-    label: string; value: any; related?: IRelatedAction
+    label: string; value: string | number | undefined; related?: IRelatedAction[]
 }
 
 interface ISurveyParams {
@@ -20,7 +20,7 @@ interface ISurveyParams {
 
 interface IUserInput {
     hidden?: boolean
-    value?: any
+    value?: string | number | undefined
 }
 
 type ISurveyParamsWithUserInput = ISurveyParams & {
