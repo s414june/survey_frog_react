@@ -19,9 +19,21 @@ const Component = ({
 
 const StarIconsBuilder = (starCount: number) => {
 	const [userInputIndex, setUserInputIndex] = useState<null | number>(null)
-	const fillStars = (starIndex: number) => {
-		return userInputIndex && userInputIndex >= starIndex
+	const [isActive, setIsActive] = useState<boolean>(false)
+
+	const handleClick = (index: number) => {
+		if (userInputIndex === null) setIsActive(true)
+		else if (userInputIndex === index && isActive) setIsActive(false)
+		else setIsActive(true)
+		setUserInputIndex(index)
 	}
+
+	const fillStars = (starIndex: number) => {
+		if (userInputIndex === null) return false
+		if (!isActive) return false
+		return userInputIndex >= starIndex
+	}
+
 	const stars = []
 	for (let i = 0; i < starCount; i++) {
 		stars.push(
@@ -31,8 +43,8 @@ const StarIconsBuilder = (starCount: number) => {
 					"text-cyan-500": fillStars(i),
 					" text-gray-200": !fillStars(i),
 				})}
-				onClick={() => setUserInputIndex(i)}
-			/>
+				onClick={() => handleClick(i)}
+			/>,
 		)
 	}
 	return stars
