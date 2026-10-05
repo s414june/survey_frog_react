@@ -1,53 +1,36 @@
+import type { Ref } from "react"
 import { FaStar } from "react-icons/fa"
 import clsx from "clsx"
-import { useState } from "react"
 
-const Component = ({
-	starCount = 5,
-}: {
-	question?: string
-	required?: boolean
+type Props = {
+	name: string
+	value: string
+	onChange: (value: string) => void
+	onBlur: () => void
+	inputRef: Ref<HTMLInputElement>
 	starCount?: number
-}) => {
-	const starIcons = StarIconsBuilder(starCount)
+	invalid?: boolean
+	describedBy?: string
+}
+
+export default function Star({ name, value, onChange, onBlur, inputRef, starCount = 5, invalid, describedBy }: Props) {
 	return (
-		<>
-			<div className="flex text-4xl">{starIcons}</div>
-		</>
+		<div className="flex text-4xl">
+			{Array.from({ length: starCount }, (_, index) => {
+				const score = String(index + 1)
+				return (
+					<label key={score} className="cursor-pointer rounded focus-within:ring-2 focus-within:ring-cyan-600">
+						<input
+							ref={index === 0 ? inputRef : undefined}
+							type="radio" name={name} value={score} checked={value === score}
+							onChange={() => onChange(score)} onBlur={onBlur}
+							aria-label={`${score} 顆星`} aria-invalid={invalid} aria-describedby={describedBy}
+							className="sr-only"
+						/>
+						<FaStar aria-hidden="true" className={clsx("w-12", Number(value) >= index + 1 ? "text-cyan-500" : "text-gray-200")} />
+					</label>
+				)
+			})}
+		</div>
 	)
 }
-
-const StarIconsBuilder = (starCount: number) => {
-	const [userInputIndex, setUserInputIndex] = useState<null | number>(null)
-	const [isActive, setIsActive] = useState<boolean>(false)
-
-	const handleClick = (index: number) => {
-		if (userInputIndex === null) setIsActive(true)
-		else if (userInputIndex === index && isActive) setIsActive(false)
-		else setIsActive(true)
-		setUserInputIndex(index)
-	}
-
-	const fillStars = (starIndex: number) => {
-		if (userInputIndex === null) return false
-		if (!isActive) return false
-		return userInputIndex >= starIndex
-	}
-
-	const stars = []
-	for (let i = 0; i < starCount; i++) {
-		stars.push(
-			<FaStar
-				key={i}
-				className={clsx("w-12 cursor-pointer select-none", {
-					"text-cyan-500": fillStars(i),
-					" text-gray-200": !fillStars(i),
-				})}
-				onClick={() => handleClick(i)}
-			/>,
-		)
-	}
-	return stars
-}
-
-export default Component

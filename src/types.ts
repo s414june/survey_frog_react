@@ -10,9 +10,10 @@ interface IOption {
 interface ISurveyParams {
     id?: string
     type: string
-    question: string
-    required: boolean
+    question?: string
+    required?: boolean
     starCount?: number
+    validation?: "email" | "tel"
     options?: IOption[]
     name?: string
     hidden?: boolean

@@ -16,7 +16,7 @@ const Component = ({ options }: { options?: IOption[] }) => {
 }
 
 const TextsBuilder = (options: IOption[]) => {
-	let textList = []
+	const textList = []
 	for (let i = 0; i < options.length; i++) {
 		textList.push(<p key={i}>{options[i].label}</p>)
 	}

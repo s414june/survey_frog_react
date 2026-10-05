@@ -1,7 +1,6 @@
-import { useState } from "react"
-import { useLoaderData } from "react-router"
-import { useNavigate } from "react-router-dom"
-import { nextRoute } from "../utils/pager"
+import type { FormEvent } from "react"
+import { Controller, useFormContext, useWatch } from "react-hook-form"
+import { useLoaderData, useNavigate } from "react-router"
 import Card from "../components/Card"
 import Button from "../components/Button"
 import Star from "../components/survey/Star"
@@ -9,156 +8,97 @@ import Select from "../components/survey/Select"
 import RadioGroup from "../components/survey/RadioGroup"
 import TextInput from "../components/survey/TextInput"
 import TextInfo from "../components/survey/TextInfo"
-import type { ISurveyParams, ISurveyParamsWithUserInput } from "../types"
-import { usePageStore } from "../composable/PageContext"
+import pageSettings from "../page-settings.json"
+import { getVisibleQuestions, questions, type Answers } from "../utils/survey"
 
-function App() {
-	const { totalPages } = usePageStore()
-	const loaderData = useLoaderData()
+export default function Page() {
+	const { pageNumber, title } = useLoaderData() as { pageNumber: number; title: string }
 	const navigate = useNavigate()
-	const currentPageNumber = loaderData.pageNumber
-
-	const [surveyData, setSurveyData] = useState<ISurveyParamsWithUserInput[]>(
-		loaderData.surveys.map((item: ISurveyParams) => ({
-			...item,
-			userInput: { hidden: item.hidden ?? false, value: null },
-		}))
+	const {
+		control, register, trigger, handleSubmit,
+		formState: { errors, isSubmitting },
+	} = useFormContext<Answers>()
+	const answers = useWatch({ control }) as Answers
+	const visibleIds = new Set(getVisibleQuestions(answers).map((question) => question.id))
+	const pageQuestions = questions.filter((question) =>
+		question.pageNumber === pageNumber &&
+		(question.type === "info" || visibleIds.has(question.id))
 	)
 
-	const actionButtonElement = (
-		pageNumber: number,
-		totalPages: number | null
-	) => {
-		const pageRoute = "/page/" + pageNumber
-		if (!totalPages) {
-			return null
+	async function submitPage(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault()
+		const fieldNames = pageQuestions.filter((question) => question.type !== "info").map((question) => question.id)
+		if (fieldNames.length && !await trigger(fieldNames, { shouldFocus: true })) return
+		if (pageNumber < pageSettings.length) {
+			navigate(`/page/${pageNumber + 1}`)
+		} else {
+			await handleSubmit(() => navigate("/end"), (allErrors) => {
+				const firstInvalid = questions.find((question) => allErrors[question.id])
+				if (firstInvalid) navigate(`/page/${firstInvalid.pageNumber}`)
+			})()
 		}
-		return pageNumber < totalPages ? (
-			<Button
-				message="下一頁"
-				onClick={() =>
-					navigate(nextRoute(pageRoute, totalPages) ?? "")
-				}></Button>
-		) : (
-			<Button
-				message="送出"
-				className="w-60"
-				onClick={() =>
-					navigate(nextRoute(pageRoute, totalPages) ?? "")
-				}></Button>
-		)
-	}
-
-	const getRequiredAsterisk = (required: boolean | undefined) => {
-		if (required) {
-			return <span className="text-red-500">*</span>
-		}
-		return null
-	}
-
-	const getElementByType = (
-		params: ISurveyParamsWithUserInput,
-		handleAction:
-			| ((value: { action: string; id: string }[]) => void)
-			| undefined
-	) => {
-		switch (params.type) {
-			case "star":
-				return <Star question={params.question} required={params.required} />
-			case "select":
-				return (
-					<Select
-						question={params.question}
-						required={params.required}
-						options={params.options}
-						hidden={params.userInput.hidden ?? params.hidden}
-					/>
-				)
-			case "radio":
-				return (
-					<RadioGroup
-						question={params.question}
-						required={params.required}
-						options={params.options}
-						name={params.name}
-						hidden={params.userInput.hidden ?? params.hidden}
-						onAction={handleAction}
-					/>
-				)
-
-			case "input":
-				return <TextInput hidden={params.userInput.hidden ?? params.hidden} />
-
-			case "info":
-				return <TextInfo options={params.options} />
-			default:
-				break
-		}
-		return null
-	}
-
-	const surveyJsxElement = (
-		params: ISurveyParamsWithUserInput,
-		index: number,
-		handleAction:
-			| ((value: { action: string; id: string }[]) => void)
-			| undefined
-	) => {
-		if (params.userInput.hidden) return
-		return (
-			<div key={index} className="mb-5">
-				<h5 className="text-xl font-bold mb-3">
-					{params.question}
-					{getRequiredAsterisk(params.required)}
-				</h5>
-				<div>{getElementByType(params, handleAction)} </div>
-			</div>
-		)
-	}
-
-	const handleAction = (valueList: { action: string; id: string }[]) => {
-		setSurveyData((prev) => {
-			const newData = prev?.map((item) => {
-				valueList.forEach((value) => {
-					if (item.id === value.id) {
-						const newUserInput = item.userInput || {}
-						if (value.action === "show") {
-							newUserInput.hidden = false
-						} else if (value.action === "hide") {
-							newUserInput.hidden = true
-						}
-						return { ...item, userInput: newUserInput }
-					}
-				})
-				return item
-			})
-			return newData
-		})
-	}
-
-	const getSurveyBlocks = () => {
-		return surveyData.map((item: ISurveyParamsWithUserInput, index: number) =>
-			surveyJsxElement(item, index, handleAction)
-		)
 	}
 
 	return (
-		<>
-			<Card>
-				<form className="w-full">
-					<div className="mb-5">
-						<h2 className="text-3xl font-bold before:block before:absolute before:w-2 before:h-10 before:left-0 before:bg-cyan-500">
-							{loaderData.title}
-						</h2>
-						<div className="my-4 question">{getSurveyBlocks()}</div>
-					</div>
-					<div className="w-full flex justify-center">
-						{actionButtonElement(currentPageNumber, totalPages)}
-					</div>
-				</form>
-			</Card>
-		</>
+		<Card>
+			<form id="survey-form" className="w-full" noValidate onSubmit={submitPage}>
+				<h2 className="text-3xl font-bold before:block before:absolute before:w-2 before:h-10 before:left-0 before:bg-cyan-500">{title}</h2>
+				<div className="my-4 question">
+					{pageQuestions.map((question) => {
+						if (question.type === "info") return <div key={question.id} className="mb-5"><TextInfo options={question.options} /></div>
+						const error = errors[question.id]?.message
+						const errorId = `${question.id}-error`
+						const accessibility = {
+							"aria-invalid": Boolean(error),
+							"aria-describedby": error ? errorId : undefined,
+							"aria-required": Boolean(question.required),
+						}
+						return (
+							<fieldset key={question.id} className="mb-5">
+								<legend id={`${question.id}-label`} className="text-xl font-bold mb-3">
+									{question.question}{question.required ? <span className="text-red-500">*</span> : null}
+								</legend>
+								{question.type === "star" ? (
+									<Controller name={question.id} control={control} render={({ field }) => (
+										<Star
+											name={field.name} value={field.value}
+											onChange={field.onChange} onBlur={field.onBlur}
+											inputRef={field.ref} starCount={question.starCount}
+											invalid={Boolean(error)} describedBy={error ? errorId : undefined}
+										/>
+									)} />
+								) : null}
+								{question.type === "select" ? (
+									<Select
+										{...register(question.id)} {...accessibility}
+										aria-labelledby={`${question.id}-label`}
+										options={question.options}
+									/>
+								) : null}
+								{question.type === "radio" ? (
+									<Controller name={question.id} control={control} render={({ field }) => (
+										<RadioGroup
+											name={field.name} ref={field.ref}
+											onBlur={field.onBlur} onChange={field.onChange}
+											options={question.options} {...accessibility}
+											selectedValue={field.value}
+										/>
+									)} />
+								) : null}
+								{question.type === "input" ? (
+									<TextInput
+										{...register(question.id)} {...accessibility}
+										aria-labelledby={`${question.id}-label`}
+										type={question.validation ?? "text"}
+									/>
+								) : null}
+								{error ? <p id={errorId} role="alert" className="mt-2 text-sm text-red-600">{error}</p> : null}
+							</fieldset>
+						)
+					})}
+				</div>
+				<div className="w-full flex justify-center"><Button type="submit" disabled={isSubmitting} message={pageNumber < pageSettings.length ? "下一頁" : "送出"} /></div>
+			</form>
+		</Card>
 	)
 }
-
-export default App

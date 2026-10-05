@@ -1,63 +1,17 @@
-import type { IRelatedAction, IOption } from "../../types"
+import type { ComponentPropsWithRef } from "react"
+import type { IOption } from "../../types"
 
-const Component = ({
-	options,
-	name,
-	hidden,
-	onAction,
-}: {
-	question?: string
-	required?: boolean
-	options?: IOption[]
-	name?: string
-	hidden?: boolean
-	onAction?: (value: IRelatedAction[]) => void
-}) => {
-	if (hidden) {
-		return null
-	}
+type Props = ComponentPropsWithRef<"input"> & { options?: IOption[]; selectedValue: string }
+
+export default function RadioGroup({ options, selectedValue, ...props }: Props) {
 	return (
-		<>
-			<div className="grid grid-cols-2 gap-4">
-				{getRadioJsx(options, name, onAction)}
-			</div>
-		</>
+		<div className="grid grid-cols-2 gap-4">
+			{options?.map((option, index) => (
+				<label key={String(option.value)} className="radio-option rounded border border-cyan-500 p-2 px-3 flex">
+					<input {...props} ref={index === 0 ? props.ref : undefined} type="radio" value={option.value} checked={selectedValue === String(option.value)} />
+					<span className="w-full block px-2 text-lg text-gray-500">{option.label}</span>
+				</label>
+			))}
+		</div>
 	)
 }
-
-const getRadioJsx = (
-	options: IOption[] | undefined,
-	name?: string,
-	onAction?: (value: IRelatedAction[]) => void
-) => {
-	if (!options) return null
-	return options.map((option, index) => (
-		<div
-			key={index}
-			className="radio-option rounded border border-cyan-500 p-2 px-3 flex">
-			<input
-				value={option.value}
-				name={name}
-				type="radio"
-				id={"option_" + option.value}
-				onChange={() => doAction(option.related, onAction)}
-			/>
-			<label
-				htmlFor={"option_" + option.value}
-				className="w-full block px-2 text-lg text-gray-500">
-				{option.label}
-			</label>
-		</div>
-	))
-}
-
-const doAction = (
-	value?: IRelatedAction[],
-	onAction?: (value: IRelatedAction[]) => void
-) => {
-	if (!value) return
-	if (!onAction) return
-	onAction(value)
-}
-
-export default Component

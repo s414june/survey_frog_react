@@ -4,10 +4,14 @@ const Component = ({
 	message,
 	className,
 	onClick,
+	type = "button",
+	disabled = false,
 }: {
 	message?: string
 	className?: string
 	onClick?: () => void
+	type?: "button" | "submit"
+	disabled?: boolean
 }) => {
 	const baseClasses = [
 		"inline-block px-6 py-2.5",
@@ -21,7 +25,8 @@ const Component = ({
 	return (
 		<>
 			<button
-				type="button"
+				type={type}
+				disabled={disabled}
 				className={clsx(baseClasses, className)}
 				onClick={onClick}>
 				{message}

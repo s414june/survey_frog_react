@@ -1,29 +1,13 @@
-import { createContext, useContext } from "react"
-import pageSettings from "../page-settings.json"
+import type { ReactNode } from "react"
+import { FormProvider, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { defaultAnswers, surveySchema, type Answers } from "../utils/survey"
 
-type PageState = {
-	totalPages: number | null
-	setTotalPages: (value: number) => void
-}
-
-const PageContext = createContext<PageState | null>(null)
-
-export const PageProvider = ({ children }: { children: React.ReactNode }) => {
-	const totalPages = pageSettings.length ?? 0
-
-	return (
-		<PageContext.Provider
-			value={{
-				totalPages,
-				setTotalPages: () => {},
-			}}>
-			{children}
-		</PageContext.Provider>
-	)
-}
-
-export const usePageStore = () => {
-	const ctx = useContext(PageContext)
-	if (!ctx) throw new Error("usePageStore must be used inside PageProvider")
-	return ctx
+export const PageProvider = ({ children }: { children: ReactNode }) => {
+	const methods = useForm<Answers>({
+		defaultValues: defaultAnswers,
+		resolver: zodResolver(surveySchema),
+		mode: "onTouched",
+	})
+	return <FormProvider {...methods}>{children}</FormProvider>
 }

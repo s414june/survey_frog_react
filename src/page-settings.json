@@ -163,11 +163,13 @@
             },
             {
                 "type": "input",
-                "question": "聯絡電話"
+                "question": "聯絡電話",
+                "validation": "tel"
             },
             {
                 "type": "input",
-                "question": "電子信箱"
+                "question": "電子信箱",
+                "validation": "email"
             }
         ]
     }
